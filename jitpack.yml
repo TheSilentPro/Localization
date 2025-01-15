@@ -2,4 +2,4 @@ jdk:
   - openjdk21
 
 build:
-  - mvn clean install
+  - mvn clean install -Dmaven.compiler.plugin.version=3.6.3
