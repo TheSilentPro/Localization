@@ -77,13 +77,10 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
             raw = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), raw);
         }
 
-        MiniMessage mm;
-        Player player = Bukkit.getPlayer(uuid);
-        if (player != null) {
-            mm = MiniMessage.builder().tags(TagResolver.builder().resolvers(TagResolver.standard(), papiTag(player)).build()).build();
-        } else {
-            mm = MiniMessage.miniMessage();
-        }
+        MiniMessage mm = MiniMessage
+                .builder()
+                .tags(TagResolver.builder().resolvers(TagResolver.standard(), papiTag(Bukkit.getOfflinePlayer(uuid))).build())
+                .build();
 
         message = Optional.of(mm.deserialize(raw));
 
@@ -167,7 +164,7 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
      *
      * @see <a href="https://docs.advntr.dev/faq.html#how-can-i-use-bukkits-placeholderapi-in-minimessage-messages">Adventure FAQ</a>
      */
-    public @NotNull TagResolver papiTag(final @NotNull Player player) {
+    public @NotNull TagResolver papiTag(final @NotNull OfflinePlayer player) {
         return TagResolver.resolver("papi", (argumentQueue, context) -> {
             // Get the string placeholder that they want to use.
             final String papiPlaceholder = argumentQueue.popOr("papi tag requires an argument").value();
