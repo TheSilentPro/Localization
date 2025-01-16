@@ -118,6 +118,29 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
     }
 
     @Override
+    public @NotNull Optional<Component> getConsoleMessage(@NotNull String key) {
+        Optional<Component> message = super.getConsoleMessage(key);
+        if (message.isEmpty()) {
+            return message;
+        }
+
+        String raw = PlainTextComponentSerializer.plainText().serialize(message.get());
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            raw = PlaceholderAPI.setPlaceholders(null, raw); // apparently, null is for console
+        }
+
+        MiniMessage mm = MiniMessage
+                .builder()
+                .tags(TagResolver.builder().resolvers(TagResolver.standard(), papiTag(null)).build())  // apparently, null is for console
+                .build();
+
+        message = Optional.of(mm.deserialize(raw));
+
+        return message;
+    }
+
+    @Override
     public void sendConsoleMessage(ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<Component> function, String... args) {
         notNull(key, "Key must not be null!");
 
@@ -164,7 +187,7 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
      *
      * @see <a href="https://docs.advntr.dev/faq.html#how-can-i-use-bukkits-placeholderapi-in-minimessage-messages">Adventure FAQ</a>
      */
-    public @NotNull TagResolver papiTag(final @NotNull OfflinePlayer player) {
+    public @NotNull TagResolver papiTag(final OfflinePlayer player) {
         return TagResolver.resolver("papi", (argumentQueue, context) -> {
             // Get the string placeholder that they want to use.
             final String papiPlaceholder = argumentQueue.popOr("papi tag requires an argument").value();
