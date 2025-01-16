@@ -3,9 +3,11 @@ package tsp.localization.paper;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -69,11 +71,21 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
             return message;
         }
 
-        /* TODO: PAPI Support.
+        String raw = PlainTextComponentSerializer.plainText().serialize(message.get());
+
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            message = Optional.of(MiniMessage.miniMessage().deserialize(MiniMessage.miniMessage().serialize(message.get()), papiTag(Bukkit.getOfflinePlayer(uuid))));
+            raw = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), raw);
         }
-         */
+
+        MiniMessage mm;
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            mm = MiniMessage.builder().tags(TagResolver.builder().resolvers(TagResolver.standard(), papiTag(player)).build()).build();
+        } else {
+            mm = MiniMessage.miniMessage();
+        }
+
+        message = Optional.of(mm.deserialize(raw));
 
         return message;
     }
@@ -149,12 +161,13 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
 
     /**
      * Creates a tag resolver capable of resolving PlaceholderAPI tags for a given player.
-     * <a href="https://docs.advntr.dev/faq.html#how-can-i-use-bukkits-placeholderapi-in-minimessage-messages">Adventure FAQ reference.</a>
      *
      * @param player the player
      * @return the tag resolver
+     *
+     * @see <a href="https://docs.advntr.dev/faq.html#how-can-i-use-bukkits-placeholderapi-in-minimessage-messages">Adventure FAQ</a>
      */
-    public @NotNull TagResolver papiTag(final @NotNull OfflinePlayer player) {
+    public @NotNull TagResolver papiTag(final @NotNull Player player) {
         return TagResolver.resolver("papi", (argumentQueue, context) -> {
             // Get the string placeholder that they want to use.
             final String papiPlaceholder = argumentQueue.popOr("papi tag requires an argument").value();
