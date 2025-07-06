@@ -87,21 +87,6 @@ public abstract class AbstractLocalization<T, A, R> implements Localization<T, A
     public abstract void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable UnaryOperator<T> function, @Nullable A... args);
 
     @Override
-    public void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable UnaryOperator<T> function) {
-        sendMessage(receiver, key, function, (A[]) null);
-    }
-
-    @Override
-    public void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable A... args) {
-        sendMessage(receiver, key, null, args);
-    }
-
-    @Override
-    public void sendMessage(@NotNull R receiver, @NotNull String key) {
-        sendMessage(receiver, key, null, (A[]) null);
-    }
-
-    @Override
     public void sendMessages(@NotNull String key, @NotNull R... receivers) {
         for (R receiver : receivers) {
             sendMessage(receiver, key);
@@ -119,38 +104,6 @@ public abstract class AbstractLocalization<T, A, R> implements Localization<T, A
 
     @Override
     public abstract void sendConsoleMessage(ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<T> function, @Nullable A... args);
-
-    public void sendConsoleMessage(@NotNull String key, @Nullable UnaryOperator<T> function, @Nullable A... args) {
-        sendConsoleMessage(ConsoleLogLevel.INFO, key, function, args);
-    }
-
-    @Override
-    public void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<T> function) {
-        sendConsoleMessage(level, key, function, (A[]) null);
-    }
-
-    public void sendConsoleMessage(@NotNull String key, @Nullable UnaryOperator<T> function) {
-        sendConsoleMessage(ConsoleLogLevel.INFO, key, function);
-    }
-
-    @Override
-    public void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable A... args) {
-        sendConsoleMessage(level, key, null, args);
-    }
-
-    public void sendConsoleMessage(@NotNull String key, @Nullable A... args) {
-        sendConsoleMessage(ConsoleLogLevel.INFO, key, args);
-    }
-
-    @Override
-    public void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key) {
-        sendConsoleMessage(level, key, null, (A[]) null);
-    }
-
-    @Override
-    public void sendConsoleMessage(@NotNull String key) {
-        sendConsoleMessage(ConsoleLogLevel.INFO, key);
-    }
 
     @Override
     public @NotNull Optional<T> getConsoleMessage(@NotNull String key) {

@@ -230,12 +230,16 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
         }
     }
 
+    public void sendMessage(CommandSender receiver, String key, @Nullable String... args) {
+        sendMessage(receiver, key, null, args);
+    }
+
     public void sendMessage(CommandSender receiver, String key, @Nullable UnaryOperator<Component> function) {
         sendMessage(receiver, key, function, (String[]) null);
     }
 
     public void sendMessage(CommandSender receiver, String key) {
-        sendMessage(receiver, key, null);
+        sendMessage(receiver, key, null, (String[]) null);
     }
 
     public void sendMessage(String key, CommandSender... receivers) {

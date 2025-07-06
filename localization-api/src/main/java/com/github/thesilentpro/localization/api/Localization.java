@@ -56,7 +56,9 @@ public interface Localization<T, A, R> {
      * @param key The message key.
      * @param function Optional transformation function for the message.
      */
-    void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable UnaryOperator<T> function);
+    default void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable UnaryOperator<T> function) {
+        sendMessage(receiver, key, function, (A[]) null);
+    }
 
     /**
      * Sends a message to a receiver with optional arguments.
@@ -65,7 +67,9 @@ public interface Localization<T, A, R> {
      * @param key      The message key.
      * @param args     Optional arguments to be used in the message.
      */
-    void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable A... args);
+    default void sendMessage(@NotNull R receiver, @NotNull String key, @Nullable A... args) {
+        sendMessage(receiver, key, null, args);
+    }
 
     /**
      * Sends a message to a receiver.
@@ -73,7 +77,9 @@ public interface Localization<T, A, R> {
      * @param receiver The receiver.
      * @param key The message key.
      */
-    void sendMessage(@NotNull R receiver, @NotNull String key);
+    default void sendMessage(@NotNull R receiver, @NotNull String key) {
+        sendMessage(receiver, key, null, (A[]) null);
+    }
 
     /**
      * Sends a message to multiple receivers.
@@ -101,13 +107,19 @@ public interface Localization<T, A, R> {
      */
     void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<T> function, @Nullable A... args);
 
+    default void sendConsoleMessage(@NotNull String key, @Nullable UnaryOperator<T> function, @Nullable A... args) {
+        sendConsoleMessage(ConsoleLogLevel.INFO, key, function, args);
+    }
+
     /**
      * Sends a message to the console with an optional message transformation function.
      *
      * @param key The message key.
      * @param function Optional transformation function for the message.
      */
-    void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<T> function);
+    default void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable UnaryOperator<T> function) {
+        sendConsoleMessage(level, key, function, (A[]) null);
+    }
 
     /**
      * Sends a message to the console with optional arguments.
@@ -115,21 +127,27 @@ public interface Localization<T, A, R> {
      * @param key  The message key.
      * @param args Optional arguments to be used in the message.
      */
-    void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable A... args);
+    default void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key, @Nullable A... args) {
+        sendConsoleMessage(level, key, null, args);
+    }
 
     /**
      * Sends a message to the console.
      *
      * @param key The message key.
      */
-    void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key);
+    default void sendConsoleMessage(@Nullable ConsoleLogLevel level, @NotNull String key) {
+        sendConsoleMessage(level, key, null, (A[]) null);
+    }
 
     /**
      * Sends a message to the console.
      *
      * @param key The message key.
      */
-    void sendConsoleMessage(@NotNull String key);
+    default void sendConsoleMessage(@NotNull String key) {
+        sendConsoleMessage(ConsoleLogLevel.INFO, key);
+    }
 
     /**
      * Retrieves a message for the console.
