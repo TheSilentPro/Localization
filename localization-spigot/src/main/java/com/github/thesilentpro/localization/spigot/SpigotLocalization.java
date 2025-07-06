@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class SpigotLocalization extends AbstractLocalization<String, String, UUID> {
 
     @SuppressWarnings("RegExpRedundantEscape")
-    private final Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(\\d+)\\}\n", Pattern.CASE_INSENSITIVE); // (\{\$arg(\d+)\}) | Example: ${0}
+    private Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(\\d+)\\}", Pattern.CASE_INSENSITIVE); // (\{\$arg(\d+)\}) | Example: ${0}
 
     /**
      * If true, messages will be colorized with '&' color codes.
@@ -165,6 +165,14 @@ public class SpigotLocalization extends AbstractLocalization<String, String, UUI
 
     public boolean isColorize() {
         return colorize;
+    }
+
+    public void setArgsPattern(Pattern pattern) {
+        this.ARGS_PATTERN = pattern;
+    }
+
+    public Pattern getArgsPattern() {
+        return ARGS_PATTERN;
     }
 
     private static Level toJULLevel(ConsoleLogLevel level) {

@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class PaperLocalization extends AbstractLocalization<Component, String, UUID> {
 
     @SuppressWarnings("RegExpRedundantEscape")
-    private final Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(\\d+)\\}\n", Pattern.CASE_INSENSITIVE); // (\{\$arg(\d+)\}) | Example: ${0}
+    private Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(\\d+)\\}", Pattern.CASE_INSENSITIVE); // (\{\$arg(\d+)\}) | Example: ${0}
 
     /**
      * Creates a new {@link Localization} instance.
@@ -159,6 +159,14 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
         for (CommandSender receiver : receivers) {
             sendMessage(receiver, key);
         }
+    }
+
+    public void setArgsPattern(Pattern pattern) {
+        this.ARGS_PATTERN = pattern;
+    }
+
+    public Pattern getArgsPattern() {
+        return ARGS_PATTERN;
     }
 
     @NotNull
