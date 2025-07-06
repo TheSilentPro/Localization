@@ -2,6 +2,7 @@ package com.github.thesilentpro.localization.paper;
 
 import net.kyori.adventure.text.Component;
 import com.github.thesilentpro.localization.fileloader.YamlLanguageFileLoader;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.io.File;
 
@@ -19,7 +20,7 @@ public class PaperLoader extends YamlLanguageFileLoader<Component> {
     @Override
     public Component mapObject(Object object) {
         return switch (object) {
-            case String str -> Component.text(str);
+            case String str -> MiniMessage.miniMessage().deserialize(str);
             case Boolean b -> Component.text(b);
             case Integer n -> Component.text(n);
             case Double n -> Component.text(n);

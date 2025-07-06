@@ -162,7 +162,7 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
     }
 
     @NotNull
-    private static Level toSLF4JLevel(@Nullable ConsoleLogLevel level) {
+    public static Level toSLF4JLevel(@Nullable ConsoleLogLevel level) {
         switch (level) {
             case WARN -> {
                 return Level.WARN;
