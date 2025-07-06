@@ -90,19 +90,36 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
         entity.sendMessage(message);
     }
 
-    @Override
-    public void sendMessage(@NotNull UUID receiver, @NotNull String key, @Nullable UnaryOperator<Component> function, @Nullable String... args) {
+    public void sendMessage(@NotNull UUID receiver, @NotNull String key, @Nullable UnaryOperator<Component> function, String... args) {
         notNull(receiver, "Receiver must not be null!");
         notNull(key, "Key must not be null!");
 
-        getMessage(receiver, key).ifPresent(message -> {
+        this.getMessage(receiver, key).ifPresent((message) -> {
+            // Replace ${1}, ${2}, etc. with values from args[]
             if (args != null) {
-                message = message.replaceText(builder -> builder.match(ARGS_PATTERN).replacement((matcher, b) -> Component.text(matcher.group(2))));
+                message = message.replaceText(builder -> builder
+                        .match(this.ARGS_PATTERN)
+                        .replacement((matcher, b) -> {
+                            try {
+                                int index = Integer.parseInt(matcher.group(1)) - 1; // 1-based to 0-based
+                                if (index >= 0 && index < args.length && args[index] != null) {
+                                    return Component.text(args[index]);
+                                } else {
+                                    return Component.text(""); // Gracefully handle missing index
+                                }
+                            } catch (NumberFormatException e) {
+                                return Component.text(""); // Fallback in case of bad number
+                            }
+                        })
+                );
             }
 
-            // Apply function
-            message = function != null ? function.apply(message) : message;
-            sendTranslatedMessage(receiver, message);
+            // Apply optional text transformation function
+            if (function != null) {
+                message = function.apply(message);
+            }
+
+            this.sendTranslatedMessage(receiver, message);
         });
     }
 
