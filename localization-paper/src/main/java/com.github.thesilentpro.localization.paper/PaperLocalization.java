@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class PaperLocalization extends AbstractLocalization<Component, String, UUID> {
 
     @SuppressWarnings("RegExpRedundantEscape")
-    private Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(\\d+)\\}", Pattern.CASE_INSENSITIVE); // (\{\$arg(\d+)\}) | Example: ${0}
+    private Pattern ARGS_PATTERN = Pattern.compile("\\$\\{(?:(\\d+)(\\+)?|(\\*))\\}", Pattern.CASE_INSENSITIVE); // Example: ${0}, ${2+}, ${*}
 
     /**
      * Creates a new {@link Localization} instance.
@@ -95,26 +95,51 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
         notNull(key, "Key must not be null!");
 
         this.getMessage(receiver, key).ifPresent((message) -> {
-            // Replace ${1}, ${2}, etc. with values from args[]
-            if (args != null) {
+            if (args != null && args.length > 0) {
                 message = message.replaceText(builder -> builder
                         .match(this.ARGS_PATTERN)
                         .replacement((matcher, b) -> {
+                            // Check if it's a digit + optional plus
+                            String digitGroup = matcher.group(1);
+                            String plusGroup = matcher.group(2);
+                            String starGroup = matcher.group(3);
+
+                            if (starGroup != null) {
+                                // ${*} → all args joined by space
+                                return Component.text(String.join(" ", args));
+                            }
+
                             try {
-                                int index = Integer.parseInt(matcher.group(1)) - 1; // 1-based to 0-based
-                                if (index >= 0 && index < args.length && args[index] != null) {
-                                    return Component.text(args[index]);
+                                int index = Integer.parseInt(digitGroup) - 1; // 1-based to 0-based
+                                boolean isPlus = plusGroup != null;
+
+                                if (index < 0 || index >= args.length) {
+                                    return Component.text("");
+                                }
+
+                                if (isPlus) {
+                                    // Join all args from index onward
+                                    StringBuilder sb = new StringBuilder();
+                                    for (int i = index; i < args.length; i++) {
+                                        if (i > index) sb.append(" ");
+                                        sb.append(args[i]);
+                                    }
+                                    return Component.text(sb.toString());
                                 } else {
-                                    return Component.text(""); // Gracefully handle missing index
+                                    return Component.text(args[index] != null ? args[index] : "");
                                 }
                             } catch (NumberFormatException e) {
-                                return Component.text(""); // Fallback in case of bad number
+                                return Component.text("");
                             }
                         })
                 );
+            } else if (args != null && args.length == 0) {
+                // Handle case: args array empty but placeholders present — maybe clear?
+                message = message.replaceText(builder -> builder
+                        .match(this.ARGS_PATTERN)
+                        .replacement(Component.text("")));
             }
 
-            // Apply optional text transformation function
             if (function != null) {
                 message = function.apply(message);
             }
@@ -144,12 +169,53 @@ public class PaperLocalization extends AbstractLocalization<Component, String, U
         notNull(key, "Key must not be null!");
 
         getConsoleMessage(key).ifPresent(message -> {
-            if (args != null) {
-                message = message.replaceText(builder -> builder.match(ARGS_PATTERN).replacement((matcher, b) -> Component.text(matcher.group(2))));
+            if (args != null && args.length > 0) {
+                message = message.replaceText(builder -> builder
+                        .match(ARGS_PATTERN)
+                        .replacement((matcher, b) -> {
+                            String digitGroup = matcher.group(1);
+                            String plusGroup = matcher.group(2);
+                            String starGroup = matcher.group(3);
+
+                            if (starGroup != null) {
+                                // ${*} → all args joined by space
+                                return Component.text(String.join(" ", args));
+                            }
+
+                            try {
+                                int index = Integer.parseInt(digitGroup) - 1; // Convert 1-based to 0-based index
+                                boolean isPlus = plusGroup != null;
+
+                                if (index < 0 || index >= args.length) {
+                                    return Component.text("");
+                                }
+
+                                if (isPlus) {
+                                    // Join all args from index onward
+                                    StringBuilder sb = new StringBuilder();
+                                    for (int i = index; i < args.length; i++) {
+                                        if (i > index) sb.append(" ");
+                                        sb.append(args[i]);
+                                    }
+                                    return Component.text(sb.toString());
+                                } else {
+                                    return Component.text(args[index] != null ? args[index] : "");
+                                }
+                            } catch (NumberFormatException e) {
+                                return Component.text("");
+                            }
+                        })
+                );
+            } else if (args != null && args.length == 0) {
+                // If args array is empty but placeholders exist, clear placeholders
+                message = message.replaceText(builder -> builder
+                        .match(ARGS_PATTERN)
+                        .replacement(Component.text("")));
             }
 
-            // Apply function
+            // Apply optional transformation function
             message = function != null ? function.apply(message) : message;
+
             sendTranslatedConsoleMessage(level, message);
         });
     }
